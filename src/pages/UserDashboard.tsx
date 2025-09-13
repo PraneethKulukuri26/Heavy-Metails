@@ -65,6 +65,13 @@ export default function UserDashboard() {
   const navigate = useNavigate();
   const [mobileMenu, setMobileMenu] = useState(false);
 
+  const handleLogout = () => {
+    // Clear user session (this is just a placeholder, implement actual logout logic)
+    console.log('User logged out');
+    localStorage.removeItem('user_id');
+    navigate('/');
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 flex flex-col">
       {/* Header / Navbar */}
@@ -75,13 +82,13 @@ export default function UserDashboard() {
             <span className="font-bold text-lg text-blue-900 tracking-tight">HMPI Portal</span>
           </div>
           <nav className="hidden md:flex gap-6 text-sm font-medium text-blue-900 items-center">
-            <NavLink icon={HomeIcon} label="Home" href="/dashboard" />
+            <NavLink icon={HomeIcon} label="Home" href="/" />
             <NavLink icon={Database} label="Explore Data" href="/explore" />
             <NavLink icon={UploadCloud} label="Submit Data" href="/submit" />
             <NavLink icon={FileBarChart2} label="Compute Indices" href="/compute" />
             <NavLink icon={FileCheck2} label="Reports" href="/reports" />
             <NavLink icon={User} label="Profile" href="/profile" />
-            <button className="flex items-center gap-1 text-red-600 hover:text-red-700" onClick={() => navigate('/logout')}><LogOut className="w-4 h-4" />Logout</button>
+            <button className="flex items-center gap-1 text-red-600 hover:text-red-700" onClick={handleLogout}><LogOut className="w-4 h-4" />Logout</button>
           </nav>
           <button className="md:hidden p-2" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Open menu">
             <span className="block w-6 h-0.5 bg-blue-900 mb-1" />

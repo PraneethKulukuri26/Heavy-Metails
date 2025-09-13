@@ -73,7 +73,7 @@ function LoginForm() {
       }
       // Redirect to /home after short delay
       setTimeout(() => {
-        navigate('/home');
+        navigate('/');
       }, 800);
     }
     setLoading(false);

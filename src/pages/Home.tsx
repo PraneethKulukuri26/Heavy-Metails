@@ -9,6 +9,7 @@ export default function HomePage() {
   const [state, setState] = useState('All');
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (typeof window !== 'undefined' && localStorage.getItem('theme') === 'light' ? 'light' : 'dark'));
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
+  const [isLoggedIn, setIsLoggedIn] = useState(() => typeof window !== 'undefined' && !!localStorage.getItem('user_id'));
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,6 +17,15 @@ export default function HomePage() {
     if (theme === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  // Listen for login/logout changes in localStorage
+  useEffect(() => {
+    function handleStorage() {
+      setIsLoggedIn(!!localStorage.getItem('user_id'));
+    }
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   return (
     <div
@@ -75,13 +85,23 @@ export default function HomePage() {
             >
               {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
             </button>
-            <button
-              type="button"
-              className="rounded-lg bg-cyan-600 dark:bg-teal-500 px-3 py-1.5 text-sm font-semibold shadow hover:bg-cyan-500 dark:hover:bg-teal-400"
-              onClick={() => navigate('/auth')}
-            >
-              Login
-            </button>
+            {isLoggedIn ? (
+              <button
+                type="button"
+                className="rounded-lg bg-emerald-600 dark:bg-emerald-500 px-3 py-1.5 text-sm font-semibold shadow hover:bg-emerald-500 dark:hover:bg-emerald-400"
+                onClick={() => navigate('/dashboard')}
+              >
+                Dashboard
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="rounded-lg bg-cyan-600 dark:bg-teal-500 px-3 py-1.5 text-sm font-semibold shadow hover:bg-cyan-500 dark:hover:bg-teal-400"
+                onClick={() => navigate('/auth')}
+              >
+                Login
+              </button>
+            )}
           </div>
         </div>
       </header>
