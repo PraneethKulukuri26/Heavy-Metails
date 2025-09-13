@@ -9,6 +9,7 @@ import HMPIPage from './pages/HMPI';
 import HomePage from './pages/Home';
 import ScholarLookup from './pages/ScholarLookup';
 import { AuthPage } from './pages/Auth';
+import UserDashboard from './pages/UserDashboard';
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Root container missing');
@@ -30,10 +31,11 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: '/hmpi', element: <HMPIPage /> },
-      { path: '/scholar-lookup', element: <ScholarLookup /> },
-      { path: '/auth', element: <AuthPage /> },
-      { path: '*', element: <NotFound /> },
+  { path: '/hmpi', element: <HMPIPage /> },
+  { path: '/scholar-lookup', element: <ScholarLookup /> },
+  { path: '/auth', element: <AuthPage /> },
+  { path: '/dashboard', element: <UserDashboard /> },
+  { path: '*', element: <NotFound /> },
     ],
   },
 ]);
