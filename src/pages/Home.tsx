@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import MapView from '../components/MapView';
+import { isStateAvailable } from '../lib/indiaGeo';
+
 export default function HomePage() {
   const [year, setYear] = useState(2020);
-  const [state, setState] = useState('Uttar Pradesh');
+  const [state, setState] = useState('All');
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (typeof window !== 'undefined' && localStorage.getItem('theme') === 'light' ? 'light' : 'dark'));
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const navigate = useNavigate();
@@ -169,7 +172,8 @@ export default function HomePage() {
                   onChange={(e) => setState(e.target.value)}
                   className="mt-1 w-56 rounded-lg border border-black/10 dark:border-white/15 bg-white/70 dark:bg-slate-900/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-100"
                 >
-                  {states.map((s) => (
+                  <option value="All">All States</option>
+                  {states.filter(isStateAvailable).map((s) => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
@@ -178,12 +182,12 @@ export default function HomePage() {
           </div>
 
           <div className="mt-8 grid md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-slate-100/60 dark:bg-slate-900/60 min-h-[380px] flex items-center justify-center reveal-up">
-              {/* Map placeholder */}
-              <div className="text-center">
-                <div className="text-sm text-slate-500 dark:text-slate-400">Map Visualization</div>
-                <div className="mt-2 text-2xl font-semibold text-slate-800 dark:text-slate-200">India • {year}</div>
-                <p className="mt-2 text-slate-600 dark:text-slate-400">(Interactive map and heat overlays coming soon)</p>
+            <div className="md:col-span-2 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-slate-100/60 dark:bg-slate-900/60 min-h-[380px] reveal-up">
+              <div className="h-[380px] md:h-[480px] w-full">
+                {/* Satellite map */}
+                {/* eslint-disable-next-line @typescript-eslint/consistent-type-imports */}
+                {/* dynamic import not required, component is client-side */}
+                <MapView selectedState={state === 'All' ? undefined : state} />
               </div>
             </div>
             <div className="glassy-card p-5 reveal-up reveal-delay-1">
@@ -194,7 +198,16 @@ export default function HomePage() {
                 <li>• Trends: Seasonal and yearly</li>
                 <li>• Sources: Industrial, agricultural, natural</li>
               </ul>
-              <a href="#soon" className="mt-4 inline-block text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300 text-sm">Go to state page →</a>
+              <div className="mt-4 flex gap-3">
+                {state === 'All' ? (
+                  <a href="/states" className="inline-block text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300 text-sm">Browse All States →</a>
+                ) : (
+                  <>
+                    <a href={`/states?q=${encodeURIComponent(state)}`} className="inline-block text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300 text-sm">Open {state} →</a>
+                    <a href="/states" className="inline-block text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300 text-sm">Browse All States →</a>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>

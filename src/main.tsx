@@ -9,6 +9,8 @@ import HMPIPage from './pages/HMPI';
 import HomePage from './pages/Home';
 import ScholarLookup from './pages/ScholarLookup';
 import { AuthPage } from './pages/Auth';
+import StateDetail from './pages/StateDetail';
+import StatesIndex from './pages/StatesIndex';
 import UserDashboard from './pages/UserDashboard';
 
 const container = document.getElementById('root');
@@ -34,6 +36,8 @@ const router = createBrowserRouter([
   { path: '/hmpi', element: <HMPIPage /> },
   { path: '/scholar-lookup', element: <ScholarLookup /> },
   { path: '/auth', element: <AuthPage /> },
+      { path: '/states', element: <StatesIndex /> },
+      { path: '/states/:slug', element: <StateDetail /> },
   { path: '/dashboard', element: <UserDashboard /> },
   { path: '*', element: <NotFound /> },
     ],
