@@ -10,6 +10,7 @@ import HMPIPage from './pages/HMPI';
 import HomePage from './pages/Home';
 import ScholarLookup from './pages/ScholarLookup';
 import StateDetail from './pages/StateDetail';
+import StateData from './pages/StateData';
 import StatesIndex from './pages/StatesIndex';
 import UserDashboard from './pages/UserDashboard';
 
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
   { path: '/auth', element: <AuthPage /> },
       { path: '/states', element: <StatesIndex /> },
       { path: '/states/:slug', element: <StateDetail /> },
+  { path: '/state-data', element: <StateData /> },
   { path: '/dashboard', element: <UserDashboard /> },
   { path: '*', element: <NotFound /> },
     ],
