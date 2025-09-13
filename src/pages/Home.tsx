@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function HomePage() {
   const [year, setYear] = useState(2020);
   const [state, setState] = useState('Uttar Pradesh');
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (typeof window !== 'undefined' && localStorage.getItem('theme') === 'light' ? 'light' : 'dark'));
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -13,15 +15,15 @@ export default function HomePage() {
   }, [theme]);
 
   return (
-  <div
-    className="min-h-screen relative overflow-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-50 transition-colors"
-    onMouseMove={(e) => {
-      const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-      setParallax({ x, y });
-    }}
-  >
+    <div
+      className="min-h-screen relative overflow-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-50 transition-colors"
+      onMouseMove={(e) => {
+        const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+        const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+        setParallax({ x, y });
+      }}
+    >
       {/* Background parallax layers */}
       <div className="absolute inset-0 -z-10 parallax">
         <div
@@ -70,7 +72,13 @@ export default function HomePage() {
             >
               {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
             </button>
-            <a href="#login" className="rounded-lg bg-cyan-600 dark:bg-teal-500 px-3 py-1.5 text-sm font-semibold shadow hover:bg-cyan-500 dark:hover:bg-teal-400">Login</a>
+            <button
+              type="button"
+              className="rounded-lg bg-cyan-600 dark:bg-teal-500 px-3 py-1.5 text-sm font-semibold shadow hover:bg-cyan-500 dark:hover:bg-teal-400"
+              onClick={() => navigate('/auth')}
+            >
+              Login
+            </button>
           </div>
         </div>
       </header>
