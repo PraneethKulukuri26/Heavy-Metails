@@ -70,7 +70,7 @@ export default function HomePage() {
             >
               {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
             </button>
-            <a href="#login" className="rounded-lg bg-sky-700 dark:bg-sky-600 px-3 py-1.5 text-sm font-semibold shadow hover:bg-sky-600 dark:hover:bg-sky-500">Login</a>
+            <a href="#login" className="rounded-lg bg-cyan-600 dark:bg-teal-500 px-3 py-1.5 text-sm font-semibold shadow hover:bg-cyan-500 dark:hover:bg-teal-400">Login</a>
           </div>
         </div>
       </header>
@@ -103,7 +103,7 @@ export default function HomePage() {
                 A modern, automated HMPI platform to compute indices, visualize trends, and generate decision-ready reports — reducing manual work and errors.
               </p>
               <div className="mt-8 flex gap-4 flex-wrap">
-                <a href="#hmpi" className="rounded-xl bg-sky-700 dark:bg-sky-600 px-5 py-3 text-sm font-semibold shadow-lg hover:bg-sky-600 dark:hover:bg-sky-500 transition shimmer">Try HMPI Calculator</a>
+                <a href="#hmpi" className="rounded-xl bg-cyan-600 dark:bg-teal-500 px-5 py-3 text-sm font-semibold shadow-lg hover:bg-cyan-500 dark:hover:bg-teal-400 transition shimmer">Try HMPI Calculator</a>
                 <a href="#features" className="rounded-xl border border-black/10 dark:border-white/15 bg-black/5 dark:bg-white/5 px-5 py-3 text-sm font-semibold hover:bg-black/10 dark:hover:bg-white/10 transition">Explore Features</a>
               </div>
               <div className="mt-8 grid grid-cols-3 gap-6 text-center text-slate-700 dark:text-slate-300">
