@@ -8,6 +8,8 @@ import App from './App'; // Assuming App can be a layout
 import HMPIPage from './pages/HMPI';
 import HomePage from './pages/Home';
 import ScholarLookup from './pages/ScholarLookup';
+import StateDetail from './pages/StateDetail';
+import StatesIndex from './pages/StatesIndex';
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Root container missing');
@@ -31,6 +33,8 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: '/hmpi', element: <HMPIPage /> },
       { path: '/scholar-lookup', element: <ScholarLookup /> },
+      { path: '/states', element: <StatesIndex /> },
+      { path: '/states/:slug', element: <StateDetail /> },
       { path: '*', element: <NotFound /> },
     ],
   },
