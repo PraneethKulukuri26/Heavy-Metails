@@ -5,3 +5,147 @@
 body {
   background: #f8fafc;
 }
+
+/* Home page decorative styles */
+.water-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(2,6,23,0) 0%, rgba(6,182,212,0.12) 40%, rgba(2,6,23,0.35) 100%),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%2306b6d4" fill-opacity="0.15" d="M0,192L40,160C80,128,160,64,240,58.7C320,53,400,107,480,112C560,117,640,75,720,58.7C800,43,880,53,960,69.3C1040,85,1120,107,1200,144C1280,181,1360,235,1400,261.3L1440,288L1440,0L1400,0C1360,0,1280,0,1200,0C1120,0,1040,0,960,0C880,0,800,0,720,0C640,0,560,0,480,0C400,0,320,0,240,0C160,0,80,0,40,0L0,0Z"></path></svg>');
+  background-size: cover;
+  background-position: 50% 100%;
+  animation: waveShift 18s ease-in-out infinite alternate;
+  opacity: 0.6;
+}
+
+.bubbles::before,
+.bubbles::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  bottom: -60px;
+  width: 8px;
+  height: 8px;
+  background: rgba(125, 211, 252, 0.7);
+  border-radius: 9999px;
+  filter: blur(0.5px);
+  animation: bubbleUp 10s linear infinite;
+}
+.bubbles::after { left: 80%; animation-duration: 12s; width: 10px; height: 10px; }
+
+.glassy-card {
+  @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur;
+}
+
+.animate-slow-pan { animation: slowPan 30s ease-in-out infinite alternate; }
+
+/* Extra animations */
+.parallax {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(-1px) scale(1.1);
+}
+.parallax-layer.deep { transform: translateZ(-2px) scale(1.2); opacity: 0.5; }
+.parallax-layer.shallow { transform: translateZ(-0.5px) scale(1.05); }
+
+.reveal-up { opacity: 0; transform: translateY(16px); animation: revealUp 0.8s ease forwards; }
+.reveal-delay-1 { animation-delay: 0.15s; }
+.reveal-delay-2 { animation-delay: 0.3s; }
+.reveal-delay-3 { animation-delay: 0.45s; }
+
+.float-slow { animation: floatY 6s ease-in-out infinite; }
+.float-slower { animation: floatY 10s ease-in-out infinite; }
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -150%;
+  width: 50%; height: 100%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: shimmer 3.2s ease-in-out infinite;
+}
+
+.blob {
+  filter: blur(24px);
+  opacity: 0.25;
+  animation: blobMove 18s ease-in-out infinite alternate;
+}
+
+@keyframes revealUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatY {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { left: -150%; }
+  100% { left: 150%; }
+}
+
+@keyframes blobMove {
+  0% { transform: translate(0,0) scale(1); }
+  100% { transform: translate(20px,-16px) scale(1.05); }
+}
+
+@keyframes waveShift {
+  0% { background-position: 50% 100%; }
+  100% { background-position: 52% 98%; }
+}
+
+@keyframes bubbleUp {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(-120vh) scale(0.6); opacity: 0; }
+}
+
+@keyframes slowPan {
+  0% { transform: scale(1) translate3d(0,0,0); }
+  100% { transform: scale(1.08) translate3d(-2%, -2%, 0); }
+}
+
+/* Hero layered waves */
+.hero-waves {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.hero-waves svg {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  height: 120px;
+}
+.wave-top { bottom: 120px; animation: waveSlide 22s linear infinite; opacity: .25; }
+.wave-mid { bottom: 60px; animation: waveSlide 26s linear infinite reverse; opacity: .35; }
+.wave-bot { bottom: 0; animation: waveSlide 30s linear infinite; opacity: .5; }
+
+@keyframes waveSlide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slow-pan,
+  .float-slow,
+  .float-slower,
+  .blob,
+  .hero-waves .wave-top,
+  .hero-waves .wave-mid,
+  .hero-waves .wave-bot {
+    animation: none !important;
+  }
+}
