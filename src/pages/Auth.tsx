@@ -27,7 +27,7 @@ export function AuthPage() {
   <div className="relative z-10 w-full max-w-md p-8 bg-white rounded-2xl shadow-xl border border-cyan-100">
         {/* Branding header */}
         <div className="flex flex-col items-center mb-8">
-          <img src="/logo.svg" alt="App Logo" className="h-12 mb-2" />
+          <img src="/cgwb_logo.png" onError={e => { (e.currentTarget as HTMLImageElement).src = '/logo.svg'; }} alt="CGWB Logo" className="h-12 w-12 rounded-full ring-1 ring-black/10 dark:ring-white/10 bg-white mb-2" />
           <h1 className="text-2xl font-bold text-cyan-900 text-center tracking-tight">Heavy Metal Pollution Index Portal</h1>
         </div>
         {/* Tabs */}
