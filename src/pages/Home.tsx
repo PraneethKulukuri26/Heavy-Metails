@@ -103,7 +103,7 @@ export default function HomePage() {
                 A modern, automated HMPI platform to compute indices, visualize trends, and generate decision-ready reports — reducing manual work and errors.
               </p>
               <div className="mt-8 flex gap-4 flex-wrap">
-                <a href="#hmpi" className="rounded-xl bg-cyan-600 dark:bg-teal-500 px-5 py-3 text-sm font-semibold shadow-lg hover:bg-cyan-500 dark:hover:bg-teal-400 transition shimmer">Try HMPI Calculator</a>
+                <a href="/hmpi" className="rounded-xl bg-cyan-600 dark:bg-teal-500 px-5 py-3 text-sm font-semibold shadow-lg hover:bg-cyan-500 dark:hover:bg-teal-400 transition shimmer">Try HMPI Calculator</a>
                 <a href="#features" className="rounded-xl border border-black/10 dark:border-white/15 bg-black/5 dark:bg-white/5 px-5 py-3 text-sm font-semibold hover:bg-black/10 dark:hover:bg-white/10 transition">Explore Features</a>
               </div>
               <div className="mt-8 grid grid-cols-3 gap-6 text-center text-slate-700 dark:text-slate-300">
@@ -216,7 +216,7 @@ export default function HomePage() {
               <h3 className="text-2xl font-bold">HMPI Index Calculator</h3>
               <p className="mt-2 text-slate-700 dark:text-slate-300 max-w-prose">Enter metal concentrations and get instant indices with an AI-powered interpretation. Full module coming soon.</p>
             </div>
-            <a href="#soon" className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold shadow-lg hover:bg-emerald-500">Open Calculator</a>
+            <a href="/hmpi" className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold shadow-lg hover:bg-emerald-500">Open Calculator</a>
           </div>
         </div>
       </section>
