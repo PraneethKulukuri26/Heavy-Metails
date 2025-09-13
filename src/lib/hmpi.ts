@@ -1,7 +1,8 @@
 export type MetalKey = 'Cd' | 'Cr' | 'Cu' | 'Pb' | 'Mn' | 'Ni' | 'Fe' | 'Zn';
+export type Standards = Record<MetalKey, number>;
 
 // Drinking water standards (mg/L). Values reflect common BIS/WHO guidelines.
-export const standardsMgL: Record<MetalKey, number> = {
+export const standardsMgL: Standards = {
   Cd: 0.003,
   Cr: 0.05,
   Cu: 0.05, // health-based <=0.05; aesthetic higher
@@ -25,14 +26,14 @@ export const metalLabels: Record<MetalKey, string> = {
 
 export type Inputs = Partial<Record<MetalKey, number>>;
 
-export function computeHPI(inputs: Inputs) {
+export function computeHPI(inputs: Inputs, stds: Standards = standardsMgL) {
   // Qi = 100 * (Mi - Ii) / (Si - Ii) ; Ii=0 for heavy metals, so Qi = 100 * Mi / Si
   // Wi = 1 / Si ; HPI = (Σ Wi*Qi) / Σ Wi
-  const entries = Object.keys(standardsMgL) as MetalKey[];
+  const entries = Object.keys(stds) as MetalKey[];
   let sumW = 0;
   let sumWQ = 0;
   const details = entries.map((k) => {
-    const Si = standardsMgL[k];
+    const Si = stds[k];
     const Mi = inputs[k] ?? 0;
     const Wi = 1 / Si;
     const Qi = (Mi / Si) * 100;
@@ -57,11 +58,11 @@ export function formatNumber(n: number, digits = 3) {
 }
 
 // HEI: Heavy metal evaluation index = Σ (Mi/Si)
-export function computeHEI(inputs: Inputs) {
-  const entries = Object.keys(standardsMgL) as MetalKey[];
+export function computeHEI(inputs: Inputs, stds: Standards = standardsMgL) {
+  const entries = Object.keys(stds) as MetalKey[];
   let sum = 0;
   const details = entries.map((k) => {
-    const Si = standardsMgL[k];
+    const Si = stds[k];
     const Mi = inputs[k] ?? 0;
     const ratio = Mi / Si;
     sum += ratio;
@@ -71,15 +72,21 @@ export function computeHEI(inputs: Inputs) {
 }
 
 // CI: Contamination index = max_i (Mi/Si)
-export function computeCI(inputs: Inputs) {
-  const entries = Object.keys(standardsMgL) as MetalKey[];
+export function computeCI(inputs: Inputs, stds: Standards = standardsMgL) {
+  const entries = Object.keys(stds) as MetalKey[];
   let max = 0;
   const details = entries.map((k) => {
-    const Si = standardsMgL[k];
+    const Si = stds[k];
     const Mi = inputs[k] ?? 0;
     const ratio = Mi / Si;
     if (ratio > max) max = ratio;
     return { key: k, Si, Mi, ratio };
   });
   return { ci: max, details };
+}
+
+export function scaleStandards(base: Standards, factor: number): Standards {
+  const out = { ...base } as Standards;
+  (Object.keys(base) as MetalKey[]).forEach(k => { out[k] = base[k] * factor; });
+  return out;
 }

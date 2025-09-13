@@ -17,7 +17,7 @@ import {
 } from 'recharts';
 
 import StateThumb from '../components/StateThumb';
-import { computeCI, computeHEI, computeHPI, metalLabels, standardsMgL, type MetalKey } from '../lib/hmpi';
+import { computeCI, computeHEI, computeHPI, metalLabels, standardsMgL, type MetalKey, type Standards, scaleStandards } from '../lib/hmpi';
 
 const metalKeys: MetalKey[] = ['Cd','Cr','Cu','Pb','Mn','Ni','Fe','Zn'];
 
@@ -49,6 +49,9 @@ export default function StateDetail() {
   const [error, setError] = useState<string | null>(null);
   const [districtFilter, setDistrictFilter] = useState<string>('All');
   const [metal, setMetal] = useState<MetalKey>('Pb');
+  const [units, setUnits] = useState<'mg/L' | 'µg/L'>('µg/L');
+  const profiles = ['BIS (Acceptable)', 'BIS (Permissible)', 'WHO'] as const;
+  const [profile, setProfile] = useState<(typeof profiles)[number]>('BIS (Acceptable)');
 
   useEffect(() => {
     let cancelled = false;
@@ -89,16 +92,28 @@ export default function StateDetail() {
     return out;
   }, [stateRows, districtFilter]);
 
-  const avgByMetal = useMemo(() => {
+  // Assume CSV values are in µg/L. Convert to mg/L for indices, then to selected display units.
+  const toMg = 0.001; // µg/L -> mg/L
+  const toDisplayFromMg = units === 'mg/L' ? 1 : 1000; // mg/L -> selected units
+
+  const stdProfile: Standards = useMemo(() => {
+    // Profiles: for demo, acceptable = base; permissible = 2×; WHO = 1× (same as base for now)
+    if (profile === 'BIS (Permissible)') return scaleStandards(standardsMgL, 2);
+    if (profile === 'WHO') return scaleStandards(standardsMgL, 1);
+    return standardsMgL;
+  }, [profile]);
+
+  // Average concentrations in mg/L for index computations
+  const avgMgByMetal = useMemo(() => {
     const res: Record<MetalKey, number> = { Cd: 0, Cr: 0, Cu: 0, Pb: 0, Mn: 0, Ni: 0, Fe: 0, Zn: 0 };
     const counts: Record<MetalKey, number> = { Cd: 0, Cr: 0, Cu: 0, Pb: 0, Mn: 0, Ni: 0, Fe: 0, Zn: 0 };
     filtered.forEach(r => {
       metalKeys.forEach(m => {
-        const v = toNum(r[m]);
+        const v = toNum(r[m]); // CSV assumed µg/L
         if (v !== undefined) { res[m] += v; counts[m] += 1; }
       });
     });
-    metalKeys.forEach(m => { res[m] = counts[m] ? res[m] / counts[m] : 0; });
+    metalKeys.forEach(m => { res[m] = counts[m] ? (res[m] / counts[m]) * toMg : 0; });
     return res;
   }, [filtered]);
 
@@ -111,29 +126,38 @@ export default function StateDetail() {
       if (!by.has(d)) by.set(d, []);
       by.get(d)!.push(v);
     });
-    const rows = Array.from(by.entries()).map(([d, arr]) => ({ District: d, value: mean(arr) || 0 }));
+    const rows = Array.from(by.entries()).map(([d, arr]) => ({
+      District: d,
+      // mean µg/L -> mg/L -> display units
+      value: ((mean(arr) || 0) * toMg) * toDisplayFromMg,
+    }));
     return rows.sort((a, b) => b.value - a.value).slice(0, 20);
-  }, [filtered, metal]);
+  }, [filtered, metal, toDisplayFromMg]);
 
-  const hmpiInputs = useMemo(() => avgByMetal, [avgByMetal]);
-  const { hpi } = useMemo(() => computeHPI(hmpiInputs), [hmpiInputs]);
-  const { hei } = useMemo(() => computeHEI(hmpiInputs), [hmpiInputs]);
-  const { ci } = useMemo(() => computeCI(hmpiInputs), [hmpiInputs]);
+  const hmpiInputs = useMemo(() => avgMgByMetal, [avgMgByMetal]);
+  const { hpi } = useMemo(() => computeHPI(hmpiInputs, stdProfile), [hmpiInputs, stdProfile]);
+  const { hei } = useMemo(() => computeHEI(hmpiInputs, stdProfile), [hmpiInputs, stdProfile]);
+  const { ci } = useMemo(() => computeCI(hmpiInputs, stdProfile), [hmpiInputs, stdProfile]);
 
   const barData = useMemo(
-    () => metalKeys.map(m => ({ key: m, value: avgByMetal[m], standard: standardsMgL[m] })),
-    [avgByMetal]
+    () => metalKeys.map(m => ({
+      key: m,
+      // mg/L -> display
+      value: avgMgByMetal[m] * toDisplayFromMg,
+      standard: stdProfile[m] * toDisplayFromMg,
+    })),
+    [avgMgByMetal, stdProfile, toDisplayFromMg]
   );
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
-      <header className="sticky top-0 z-10 backdrop-blur bg-white/70 border-b border-black/10">
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-50">
+      <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-950/40 border-b border-black/10 dark:border-white/10">
         <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/states" className="rounded-md border border-black/10 px-2 py-1 text-xs hover:bg-black/5">← All States</Link>
-            <span className="font-semibold tracking-tight">{displayName}</span>
+            <Link to="/states" className="rounded-md border border-black/10 dark:border-white/10 px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/10">← All States</Link>
+            <span className="font-semibold tracking-tight text-slate-900 dark:text-white">{displayName}</span>
           </div>
-          <div className="text-xs flex items-center gap-3">
+          <div className="text-xs flex items-center gap-3 text-slate-700 dark:text-slate-300">
             <Link to="/state-data" className="hover:underline">Statewise Data</Link>
             <Link to="/hmpi" className="hover:underline">HMPI Calculator</Link>
           </div>
@@ -147,16 +171,25 @@ export default function StateDetail() {
           </div>
           <div className="md:col-span-2 space-y-3">
             <h1 className="text-2xl font-bold">{displayName}</h1>
-            <div className="text-sm text-slate-600">Records: {filtered.length.toLocaleString()}</div>
+            <div className="text-sm text-slate-600 dark:text-slate-300">Records: {filtered.length.toLocaleString()}</div>
             <div className="flex flex-wrap gap-2 items-center">
-              <label className="text-sm">District:</label>
-              <select value={districtFilter} onChange={e => setDistrictFilter(e.target.value)} className="border rounded-lg px-3 py-2">
+              <label className="text-sm text-slate-700 dark:text-slate-300">District:</label>
+              <select value={districtFilter} onChange={e => setDistrictFilter(e.target.value)} className="border border-black/10 dark:border-white/15 rounded-lg px-3 py-2 bg-white/70 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100">
                 <option value="All">All</option>
                 {districts.map(d => (<option key={d} value={d}>{d}</option>))}
               </select>
-              <label className="text-sm ml-2">Metal:</label>
-              <select value={metal} onChange={e => setMetal(e.target.value as MetalKey)} className="border rounded-lg px-3 py-2">
+              <label className="text-sm ml-2 text-slate-700 dark:text-slate-300">Metal:</label>
+              <select value={metal} onChange={e => setMetal(e.target.value as MetalKey)} className="border border-black/10 dark:border-white/15 rounded-lg px-3 py-2 bg-white/70 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100">
                 {metalKeys.map(m => (<option key={m} value={m}>{metalLabels[m]}</option>))}
+              </select>
+              <label className="text-sm ml-2 text-slate-700 dark:text-slate-300">Units:</label>
+              <select value={units} onChange={e => setUnits(e.target.value as 'mg/L' | 'µg/L')} className="border border-black/10 dark:border-white/15 rounded-lg px-3 py-2 bg-white/70 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100">
+                <option value="mg/L">mg/L</option>
+                <option value="µg/L">µg/L</option>
+              </select>
+              <label className="text-sm ml-2 text-slate-700 dark:text-slate-300">Standards:</label>
+              <select value={profile} onChange={e => setProfile(e.target.value as (typeof profiles)[number])} className="border border-black/10 dark:border-white/15 rounded-lg px-3 py-2 bg-white/70 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100">
+                {profiles.map(p => (<option key={p} value={p}>{p}</option>))}
               </select>
             </div>
             {loading && <div className="text-slate-600">Loading data…</div>}
@@ -174,8 +207,8 @@ export default function StateDetail() {
         {!loading && !error && (
           <>
             <section>
-              <h2 className="text-lg font-semibold mb-2">Average concentration by metal (mg/L)</h2>
-              <div className="w-full h-[380px] rounded-xl border border-black/10 bg-white/60">
+              <h2 className="text-lg font-semibold mb-2">Average concentration by metal ({units})</h2>
+              <div className="w-full h-[380px] rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-slate-900/60">
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={barData} margin={{ top: 10, right: 20, left: 10, bottom: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -183,11 +216,11 @@ export default function StateDetail() {
                     <YAxis />
                     <ReTooltip formatter={(val: number, name: string, ctx?: { payload?: { key?: MetalKey } }) => {
                       if (name === 'Average' && ctx?.payload?.key) {
-                        const std = standardsMgL[ctx.payload.key];
-                        const ratio = std ? val / std : 0;
-                        return [`${val.toFixed(4)} (×${ratio.toFixed(1)})`, name];
+                        const stdDisp = stdProfile[ctx.payload.key] * toDisplayFromMg;
+                        const ratio = stdDisp ? val / stdDisp : 0;
+                        return [`${val.toFixed(4)} ${units} (×${ratio.toFixed(1)})`, name];
                       }
-                      return [val.toFixed(4), name];
+                      return [`${val.toFixed(4)} ${units}`, name];
                     }} />
                     <Legend />
                     <defs>
@@ -197,27 +230,27 @@ export default function StateDetail() {
                       </linearGradient>
                     </defs>
                     <Bar dataKey="value" name="Average" fill="url(#avgFill)" radius={[6,6,0,0]} />
-                    <Line type="monotone" dataKey="standard" name="Standard" stroke="#64748b" strokeDasharray="4 2" dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="standard" name={`${profile} standard`} stroke="#64748b" strokeDasharray="4 2" dot={{ r: 3 }} />
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold mb-2">Top districts — {metalLabels[metal]} (avg)</h2>
-              <div className="w-full h-[420px] rounded-xl border border-black/10 bg-white/60">
+              <h2 className="text-lg font-semibold mb-2">Top districts — {metalLabels[metal]} (avg, {units})</h2>
+              <div className="w-full h-[420px] rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-slate-900/60">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={seriesTopDistricts} margin={{ top: 10, right: 20, left: 0, bottom: 80 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="District" angle={-45} textAnchor="end" interval={0} height={80} />
                     <YAxis />
                     <ReTooltip formatter={(val: number) => {
-                      const std = standardsMgL[metal];
-                      const ratio = std ? val / std : 0;
-                      return [`${val.toFixed(4)} (×${ratio.toFixed(1)})`, `${metal} (avg)`];
+                      const stdDisp = stdProfile[metal] * toDisplayFromMg;
+                      const ratio = stdDisp ? val / stdDisp : 0;
+                      return [`${val.toFixed(4)} ${units} (×${ratio.toFixed(1)})`, `${metal} (avg)`];
                     }} />
                     <Legend />
-                    <ReferenceLine y={standardsMgL[metal]} stroke="#ef4444" strokeDasharray="4 4" label={{ value: 'Standard', position: 'top', fill: '#ef4444', fontSize: 12 }} />
+                    <ReferenceLine y={stdProfile[metal] * toDisplayFromMg} stroke="#ef4444" strokeDasharray="4 4" label={{ value: `${profile} standard`, position: 'top', fill: '#ef4444', fontSize: 12 }} />
                     <Bar dataKey="value" name={`${metal} (avg)`} radius={[6,6,0,0]} fill="#0ea5e9" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -225,11 +258,11 @@ export default function StateDetail() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold mb-2">First 500 records</h2>
-              <div className="overflow-x-auto border border-black/10 rounded-xl">
-                <table className="min-w-full text-sm">
+              <h2 className="text-lg font-semibold mb-2">First 500 records ({units})</h2>
+              <div className="overflow-x-auto border border-black/10 dark:border-white/10 rounded-xl">
+                <table className="min-w-full text-sm text-slate-900 dark:text-slate-100">
                   <thead>
-                    <tr className="bg-slate-50">
+                    <tr className="bg-slate-50 dark:bg-slate-800/60">
                       <th className="p-2 text-left">District</th>
                       <th className="p-2 text-left">Location</th>
                       <th className="p-2 text-left">Longitude</th>
@@ -239,18 +272,22 @@ export default function StateDetail() {
                   </thead>
                   <tbody>
                     {filtered.slice(0, 500).map((r, i) => (
-                      <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}>
+                      <tr key={i} className={i % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/60 dark:bg-slate-800/50'}>
                         <td className="p-2">{r.District}</td>
                         <td className="p-2">{r.Location}</td>
                         <td className="p-2">{r.Longitude}</td>
                         <td className="p-2">{r.Latitude}</td>
-                        {metalKeys.map(m => (<td key={m} className="p-2 text-right">{r[m]}</td>))}
+                        {metalKeys.map(m => {
+                          const v = toNum(r[m]); // CSV µg/L
+                          const disp = v === undefined ? undefined : (v * toMg) * toDisplayFromMg;
+                          return (<td key={m} className="p-2 text-right">{disp === undefined ? '' : disp.toFixed(4)}</td>);
+                        })}
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 {filtered.length > 500 && (
-                  <div className="text-xs text-slate-600 px-2 py-2">Showing first 500 rows. Narrow by district to see fewer rows.</div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400 px-2 py-2">Showing first 500 rows. Narrow by district to see fewer rows.</div>
                 )}
               </div>
             </section>
@@ -263,18 +300,18 @@ export default function StateDetail() {
 
 function Summary({ title, value, hint, tag, color }: { title: string; value: number; hint?: string; tag?: string; color?: string }) {
   return (
-    <div className="rounded-xl border border-black/10 bg-white/70 p-4">
+    <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 p-4">
       <div className="flex items-center justify-between">
-        <div className="text-xs text-slate-600">{title}</div>
+        <div className="text-xs text-slate-600 dark:text-slate-300">{title}</div>
         {tag && (
-          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-black/5">
+          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-black/5 dark:bg-white/10 text-slate-700 dark:text-slate-200">
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: color || '#64748b' }} />
             {tag}
           </span>
         )}
       </div>
-      <div className="text-2xl font-bold">{Number.isFinite(value) ? value.toFixed(2) : '-'}</div>
-      {hint && <div className="text-[11px] text-slate-500">{hint}</div>}
+      <div className="text-2xl font-bold text-slate-900 dark:text-white">{Number.isFinite(value) ? value.toFixed(2) : '-'}</div>
+      {hint && <div className="text-[11px] text-slate-500 dark:text-slate-400">{hint}</div>}
     </div>
   );
 }
