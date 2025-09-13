@@ -8,6 +8,7 @@ import App from './App'; // Assuming App can be a layout
 import HMPIPage from './pages/HMPI';
 import HomePage from './pages/Home';
 import ScholarLookup from './pages/ScholarLookup';
+import { AuthPage } from './pages/Auth';
 import StateDetail from './pages/StateDetail';
 import StatesIndex from './pages/StatesIndex';
 
@@ -33,6 +34,7 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: '/hmpi', element: <HMPIPage /> },
       { path: '/scholar-lookup', element: <ScholarLookup /> },
+      { path: '/auth', element: <AuthPage /> },
       { path: '/states', element: <StatesIndex /> },
       { path: '/states/:slug', element: <StateDetail /> },
       { path: '*', element: <NotFound /> },
