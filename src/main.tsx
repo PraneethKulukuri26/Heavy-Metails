@@ -5,10 +5,10 @@ import { createBrowserRouter, RouterProvider, Link } from 'react-router-dom';
 import './index.css';
 
 import App from './App'; // Assuming App can be a layout
+import { AuthPage } from './pages/Auth';
 import HMPIPage from './pages/HMPI';
 import HomePage from './pages/Home';
 import ScholarLookup from './pages/ScholarLookup';
-import { AuthPage } from './pages/Auth';
 import StateDetail from './pages/StateDetail';
 import StatesIndex from './pages/StatesIndex';
 
