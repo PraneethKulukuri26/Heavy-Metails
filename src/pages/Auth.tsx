@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/supabaseClient';
 
 const tabs = [
   { key: 'login', label: 'Login' },
@@ -48,8 +50,39 @@ export function AuthPage() {
 }
 
 function LoginForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setError(error.message);
+    } else {
+      setSuccess('Login successful!');
+      // Store user id in localStorage for later use
+      if (data && data.user) {
+        localStorage.setItem('user_id', data.user.id);
+      }
+      // Redirect to /home after short delay
+      setTimeout(() => {
+        navigate('/home');
+      }, 800);
+    }
+    setLoading(false);
+  }
+
   return (
-    <form className="space-y-5">
+    <form className="space-y-5" onSubmit={handleLogin}>
+      {error && <div className="text-red-600 text-sm text-center">{error}</div>}
+      {success && <div className="text-green-700 text-sm text-center">{success}</div>}
       <div>
         <label htmlFor="login-email" className="block text-sm font-medium text-blue-900">Email Address</label>
         <input
@@ -59,6 +92,8 @@ function LoginForm() {
           required
           placeholder="name@university.edu"
           className="mt-1 w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50 text-blue-900"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
         />
       </div>
       <div>
@@ -70,6 +105,8 @@ function LoginForm() {
           required
           placeholder="Password"
           className="mt-1 w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50 text-blue-900"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
         />
       </div>
       <div className="flex items-center justify-between">
@@ -78,16 +115,83 @@ function LoginForm() {
       <button
         type="submit"
         className="w-full py-2 mt-2 bg-blue-700 text-white rounded-lg font-semibold text-lg shadow hover:bg-blue-800 transition-colors"
+        disabled={loading}
       >
-        Login
+        {loading ? 'Logging in...' : 'Login'}
       </button>
     </form>
   );
 }
 
 function RegisterForm() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [institution, setInstitution] = useState('');
+  const [field, setField] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  async function handleRegister(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    if (password !== confirm) {
+      setError('Passwords do not match.');
+      return;
+    }
+    setLoading(true);
+    // Register with Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          institution,
+          field,
+        },
+      },
+    });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+    // Insert into researchers table if user created
+    const user = data?.user;
+    if (user) {
+      const { error: insertError } = await supabase.from('researchers').insert([
+        {
+          id: user.id,
+          name,
+          institution,
+          field,
+          email,
+        },
+      ]);
+      if (insertError) {
+        setError('Registration succeeded, but failed to save profile: ' + insertError.message);
+        setLoading(false);
+        return;
+      }
+    }
+    setSuccess('Registration successful! Please check your email to verify your account.');
+    setName('');
+    setEmail('');
+    setInstitution('');
+    setField('');
+    setPassword('');
+    setConfirm('');
+    setLoading(false);
+  }
+
   return (
-    <form className="space-y-5">
+    <form className="space-y-5" onSubmit={handleRegister}>
+      {error && <div className="text-red-600 text-sm text-center">{error}</div>}
+      {success && <div className="text-green-700 text-sm text-center">{success}</div>}
       <div>
         <label htmlFor="register-name" className="block text-sm font-medium text-blue-900">Full Name</label>
         <input
@@ -96,6 +200,8 @@ function RegisterForm() {
           required
           placeholder="Dr. Jane Smith"
           className="mt-1 w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50 text-blue-900"
+          value={name}
+          onChange={e => setName(e.target.value)}
         />
       </div>
       <div>
@@ -107,6 +213,8 @@ function RegisterForm() {
           required
           placeholder="name@university.edu"
           className="mt-1 w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50 text-blue-900"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
         />
       </div>
       <div>
@@ -117,6 +225,8 @@ function RegisterForm() {
           required
           placeholder="University of Science"
           className="mt-1 w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50 text-blue-900"
+          value={institution}
+          onChange={e => setInstitution(e.target.value)}
         />
       </div>
       <div>
@@ -127,6 +237,8 @@ function RegisterForm() {
           required
           placeholder="Environmental Chemistry"
           className="mt-1 w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50 text-blue-900"
+          value={field}
+          onChange={e => setField(e.target.value)}
         />
       </div>
       <div>
@@ -138,6 +250,8 @@ function RegisterForm() {
           required
           placeholder="Password"
           className="mt-1 w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50 text-blue-900"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
         />
       </div>
       <div>
@@ -149,13 +263,16 @@ function RegisterForm() {
           required
           placeholder="Confirm Password"
           className="mt-1 w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50 text-blue-900"
+          value={confirm}
+          onChange={e => setConfirm(e.target.value)}
         />
       </div>
       <button
         type="submit"
         className="w-full py-2 mt-2 bg-blue-700 text-white rounded-lg font-semibold text-lg shadow hover:bg-blue-800 transition-colors"
+        disabled={loading}
       >
-        Register
+        {loading ? 'Registering...' : 'Register'}
       </button>
       <p className="text-xs text-gray-500 text-center mt-2">Only verified researchers/scientists will be approved by Admin.</p>
     </form>
