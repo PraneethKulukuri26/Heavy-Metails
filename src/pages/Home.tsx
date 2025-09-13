@@ -125,7 +125,7 @@ export default function HomePage() {
                 <div className="aspect-[16/10] w-full rounded-xl overflow-hidden border border-black/10 dark:border-white/10 bg-slate-100/60 dark:bg-slate-900/60">
                   {/* Placeholder video/animation */}
                   <div className="relative h-full w-full">
-                    <div className="absolute inset-0 animate-slow-pan bg-[url('https://images.unsplash.com/photo-1508182311256-e3f6f3203b39?q=80&w=1600&auto=format&fit=crop')] bg-cover bg-center opacity-70" />
+                    <div className="absolute inset-0 animate-slow-pan bg-[url('/191002_groundwater.jpg')] bg-cover bg-center opacity-70" />
                     <div className="absolute inset-0 bg-gradient-to-tr from-white via-transparent to-sky-200/40 dark:from-slate-950 dark:to-sky-900/20" />
                     <div className="absolute bottom-0 left-0 p-4">
                       <div className="rounded-lg bg-white/70 dark:bg-slate-950/60 px-3 py-2 text-xs border border-black/10 dark:border-white/10 text-slate-800 dark:text-slate-200">
@@ -235,7 +235,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-6">
             <div className="reveal-up"><ResourceCard title="Dataset Download" desc="Open datasets with geo-coordinates, schemas, and quality flags." cta="Browse Datasets" /></div>
             <div className="reveal-up reveal-delay-1"><ResourceCard title="Report Generation" desc="Export PDF and CSV reports with charts and summaries." cta="Generate Reports" /></div>
-            <div className="reveal-up reveal-delay-2"><ResourceCard title="Scholar Lookup" desc="Search journal papers via Google Scholar API integration." cta="Search Papers" /></div>
+            <div className="reveal-up reveal-delay-2"><ResourceCard title="Scholar Lookup" desc="Search journal papers via Google Scholar API integration." cta="Search Papers" href="/scholar-lookup" /></div>
           </div>
         </div>
       </section>
@@ -274,14 +274,14 @@ function FeatureCard({ title, desc, tag }: { title: string; desc: string; tag: s
   );
 }
 
-function ResourceCard({ title, desc, cta }: { title: string; desc: string; cta: string }) {
+function ResourceCard({ title, desc, cta, href }: { title: string; desc: string; cta: string; href?: string }) {
   return (
     <div className="glassy-card p-6 flex flex-col justify-between">
       <div>
         <h4 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h4>
         <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">{desc}</p>
       </div>
-      <a href="#soon" className="mt-6 inline-block text-sky-700 hover:text-sky-600 dark:text-sky-400 dark:hover:text-sky-300 text-sm">{cta} →</a>
+      <a href={href || '#soon'} className="mt-6 inline-block text-sky-700 hover:text-sky-600 dark:text-sky-400 dark:hover:text-sky-300 text-sm">{cta} →</a>
     </div>
   );
 }

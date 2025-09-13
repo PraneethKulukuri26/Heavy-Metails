@@ -5,6 +5,8 @@ import { MetalKey, metalLabels, standardsMgL, computeHPI, categorizeHPI, formatN
 type Row = { key: MetalKey; value: string };
 
 export default function HMPIPage() {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => (typeof window !== 'undefined' && localStorage.getItem('theme') === 'light' ? 'light' : 'dark'));
+
   const [rows, setRows] = useState<Row[]>(() => (Object.keys(standardsMgL) as MetalKey[]).map(k => ({ key: k, value: '' })));
   const numericInputs = useMemo(() => Object.fromEntries(rows.map(r => [r.key, parseFloat(r.value) || 0])) as Record<MetalKey, number>, [rows]);
   const { hpi, details } = useMemo(() => computeHPI(numericInputs), [numericInputs]);
@@ -26,6 +28,12 @@ export default function HMPIPage() {
     document.title = 'HMPI Calculator';
   }, []);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-50">
       <header className="sticky top-0 z-20 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-950/40 border-b border-black/10 dark:border-white/10">
@@ -37,7 +45,16 @@ export default function HMPIPage() {
           <a href="/" className="text-sm text-slate-600 dark:text-slate-300 hover:underline">← Home</a>
         </div>
       </header>
-
+      <div className="absolute top-4 right-4">
+        <button
+          type="button"
+          aria-label="Toggle theme"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="rounded-md border border-black/10 dark:border-white/10 px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-200 bg-white/70 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10"
+        >
+          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+        </button>
+      </div>
       <section className="relative">
         <div className="hero-waves -z-[5]">
           <svg className="wave-top" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,0 V60 Q300,120 600,60 T1200,60 V0z" fill="currentColor" className="text-cyan-300/40 dark:text-cyan-400/30" /></svg>

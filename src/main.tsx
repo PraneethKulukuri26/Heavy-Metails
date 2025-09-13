@@ -1,18 +1,39 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Link } from 'react-router-dom';
 
-import '@/index.css';
+import './index.css';
 
+import App from './App'; // Assuming App can be a layout
 import HMPIPage from './pages/HMPI';
 import HomePage from './pages/Home';
+import ScholarLookup from './pages/ScholarLookup';
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Root container missing');
 
+function NotFound() {
+  return (
+    <div>
+      <h2>Nothing to see here!</h2>
+      <p>
+        <Link to="/">Go to the home page</Link>
+      </p>
+    </div>
+  );
+}
+
 const router = createBrowserRouter([
-  { path: '/', element: <HomePage /> },
-  { path: '/hmpi', element: <HMPIPage /> },
+  {
+    path: '/',
+    element: <App />,
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: '/hmpi', element: <HMPIPage /> },
+      { path: '/scholar-lookup', element: <ScholarLookup /> },
+      { path: '*', element: <NotFound /> },
+    ],
+  },
 ]);
 
 createRoot(container).render(
