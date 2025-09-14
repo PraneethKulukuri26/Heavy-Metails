@@ -267,7 +267,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 py-16">
           <div className="grid md:grid-cols-3 gap-6">
             <div className="reveal-up"><ResourceCard title="Dataset Download" desc="Open datasets with geo-coordinates, schemas, and quality flags." cta="Browse Datasets" /></div>
-            <div className="reveal-up reveal-delay-1"><ResourceCard title="Report Generation" desc="Export PDF and CSV reports with charts and summaries." cta="Generate Reports" /></div>
+            <div className="reveal-up reveal-delay-1"><ResourceCard title="Report Generation" desc="Export PDF and CSV reports with charts and summaries." cta="Generate Reports" href="/reports" /></div>
             <div className="reveal-up reveal-delay-2"><ResourceCard title="Scholar Lookup" desc="Search journal papers via Google Scholar API integration." cta="Search Papers" href="/scholar-lookup" /></div>
           </div>
         </div>

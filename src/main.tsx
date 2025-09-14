@@ -8,9 +8,10 @@ import App from './App'; // Assuming App can be a layout
 import { AuthPage } from './pages/Auth';
 import HMPIPage from './pages/HMPI';
 import HomePage from './pages/Home';
+import ReportsPage from './pages/Reports';
 import ScholarLookup from './pages/ScholarLookup';
-import StateDetail from './pages/StateDetail';
 import StateData from './pages/StateData';
+import StateDetail from './pages/StateDetail';
 import StatesIndex from './pages/StatesIndex';
 import UserDashboard from './pages/UserDashboard';
 
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
       { path: '/states', element: <StatesIndex /> },
       { path: '/states/:slug', element: <StateDetail /> },
   { path: '/state-data', element: <StateData /> },
+  { path: '/reports', element: <ReportsPage /> },
   { path: '/dashboard', element: <UserDashboard /> },
   { path: '*', element: <NotFound /> },
     ],

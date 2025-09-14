@@ -149,6 +149,14 @@ export default function StateDetail() {
     [avgMgByMetal, stdProfile, toDisplayFromMg]
   );
 
+  const { yMax, showStdLine } = useMemo(() => {
+    const maxBar = barData.length ? Math.max(...barData.map(d => d.value)) : 0;
+    const maxStd = barData.length ? Math.max(...barData.map(d => d.standard)) : 0;
+    const yMax = maxBar > 0 ? maxBar * 1.2 : 1;
+    const showStdLine = maxStd <= yMax * 1.5;
+    return { yMax, showStdLine };
+  }, [barData]);
+
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-50">
       <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-950/40 border-b border-black/10 dark:border-white/10">
@@ -213,7 +221,7 @@ export default function StateDetail() {
                   <ComposedChart data={barData} margin={{ top: 10, right: 20, left: 10, bottom: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="key" />
-                    <YAxis />
+                    <YAxis domain={[0, yMax]} />
                     <ReTooltip formatter={(val: number, name: string, ctx?: { payload?: { key?: MetalKey } }) => {
                       if (name === 'Average' && ctx?.payload?.key) {
                         const stdDisp = stdProfile[ctx.payload.key] * toDisplayFromMg;
@@ -230,7 +238,9 @@ export default function StateDetail() {
                       </linearGradient>
                     </defs>
                     <Bar dataKey="value" name="Average" fill="url(#avgFill)" radius={[6,6,0,0]} />
-                    <Line type="monotone" dataKey="standard" name={`${profile} standard`} stroke="#64748b" strokeDasharray="4 2" dot={{ r: 3 }} />
+                    {showStdLine && (
+                      <Line type="monotone" dataKey="standard" name={`${profile} standard`} stroke="#64748b" strokeDasharray="4 2" dot={{ r: 3 }} />
+                    )}
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>
