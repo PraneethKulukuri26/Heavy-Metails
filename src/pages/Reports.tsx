@@ -1,5 +1,5 @@
 import { csvParse } from 'd3-dsv';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ResponsiveContainer,
   Bar,
@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 
 import { computeCI, computeHEI, computeHPI, standardsMgL, scaleStandards, type MetalKey, type Standards } from '../lib/hmpi';
+import { renderSimpleMarkdown } from '../lib/markdown';
 
 type Row = {
   State: string; District: string; Location: string; Longitude: string; Latitude: string;
@@ -29,6 +30,9 @@ export default function ReportsPage() {
   const [units, setUnits] = useState<'mg/L' | 'µg/L'>('µg/L');
   const [profile, setProfile] = useState<'BIS (Acceptable)' | 'BIS (Permissible)' | 'WHO'>('BIS (Acceptable)');
   const reportRef = useRef<HTMLDivElement>(null);
+  const [aiText, setAiText] = useState<string>('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const toMg = 0.001; // µg/L -> mg/L
   const toDisplayFromMg = units === 'mg/L' ? 1 : 1000; // mg/L -> display
@@ -105,6 +109,67 @@ export default function ReportsPage() {
     return { yMax, showStdLine };
   }, [barData]);
 
+  // Exceedance stats (mg/L basis)
+  const exceedances = useMemo(() => {
+    const counts: Record<MetalKey, number> = { Cd:0, Cr:0, Cu:0, Pb:0, Mn:0, Ni:0, Fe:0, Zn:0 };
+    rows.forEach(r => {
+      metalKeys.forEach(m => {
+        const v = parseFloat(r[m]);
+        if (Number.isFinite(v)) {
+          const mg = v * toMg;
+          if (stdProfile[m] > 0 && mg / stdProfile[m] > 1) counts[m] += 1;
+        }
+      });
+    });
+    const total = rows.length;
+    const ranked = metalKeys
+      .map(m => ({ key: m, count: counts[m], pct: total ? (counts[m] / total) * 100 : 0 }))
+      .sort((a, b) => b.count - a.count);
+    return { counts, ranked, total };
+  }, [rows, stdProfile]);
+
+  const generateAISummary = useCallback(async (): Promise<string | null> => {
+    try {
+      setAiLoading(true); setAiError(null);
+      const meta = {
+        rows: rows.length,
+        units,
+        profile,
+        averages_mgL: avgMgByMetal,
+        hpi_avg: average(computed.map(r => r.HPI)),
+        hei_avg: average(computed.map(r => r.HEI)),
+        ci_max: computed.length ? Math.max(...computed.map(r => r.CI)) : 0,
+        exceedances: exceedances.ranked.slice(0, 8),
+      };
+      const prompt = `You are assisting with a professional groundwater heavy metals report.
+Use the provided metrics to write a concise, executive-style narrative with:
+- Executive Summary (3-5 sentences)
+- Key Findings (bulleted, 4-6 bullets)
+- Possible Sources & Considerations (2-4 bullets)
+- Recommendations (3-5 bullets)
+
+Avoid absolute claims—use cautious language. Do not fabricate numbers; refer qualitatively to trends. Keep it under 300 words.
+Context JSON:\n${JSON.stringify(meta)}\n`;
+      const res = await fetch('/api/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt }) });
+      if (!res.ok) throw new Error('AI service failed');
+      const txt = await res.text();
+      setAiText(txt.trim());
+      return txt.trim();
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : 'Failed to generate AI summary');
+      return null;
+    } finally {
+      setAiLoading(false);
+    }
+  }, [rows.length, units, profile, avgMgByMetal, computed, exceedances]);
+
+  // Auto-generate AI summary when data becomes available
+  useEffect(() => {
+    if (rows.length && !aiText && !aiLoading) {
+      void generateAISummary();
+    }
+  }, [rows.length, aiText, aiLoading, generateAISummary]);
+
   function downloadCSV() {
     const headers = [...requiredHeaders, 'HPI','HEI','CI'] as const;
     const csv = [headers.join(',')].concat(
@@ -118,18 +183,36 @@ export default function ReportsPage() {
 
   async function downloadPDF() {
     const el = reportRef.current; if (!el) return;
+    // Ensure AI summary exists before capture
+    if (rows.length && !aiText && !aiLoading) {
+      await generateAISummary();
+      await new Promise((r) => setTimeout(r, 200));
+    }
     const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
       import('html2canvas'),
       import('jspdf'),
     ]);
-    const canvas = await html2canvas(el, { scale: 2, backgroundColor: null });
+    const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff' });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const ratio = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
-    const imgW = canvas.width * ratio; const imgH = canvas.height * ratio;
-    pdf.addImage(imgData, 'PNG', (pageWidth - imgW)/2, 20, imgW, imgH);
+    const margin = 24; // pt
+    const imgWidth = pageWidth - margin * 2;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = margin;
+    pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+    heightLeft -= (pageHeight - margin * 2);
+
+    while (heightLeft > 0) {
+      pdf.addPage();
+      position = margin - (imgHeight - heightLeft);
+      pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+      heightLeft -= (pageHeight - margin * 2);
+    }
+
     pdf.save('hmpi_report.pdf');
   }
 
@@ -184,6 +267,11 @@ export default function ReportsPage() {
               </select>
             </div>
             <div className="flex gap-2">
+              <button onClick={generateAISummary} disabled={!rows.length || aiLoading} className="flex-1 rounded-lg border border-black/10 dark:border-white/10 px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-50">
+                {aiLoading ? 'Generating…' : 'Generate AI Summary'}
+              </button>
+            </div>
+            <div className="flex gap-2">
               <button onClick={downloadCSV} className="flex-1 rounded-lg bg-sky-600 dark:bg-teal-500 px-3 py-2 text-sm font-semibold hover:bg-sky-500 dark:hover:bg-teal-400">Download CSV</button>
               <button onClick={downloadPDF} className="flex-1 rounded-lg border border-black/10 dark:border-white/10 px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/10">Download PDF</button>
             </div>
@@ -193,11 +281,37 @@ export default function ReportsPage() {
 
         {rows.length > 0 && (
           <section ref={reportRef} className="space-y-6">
+            {/* Report Header */}
+            <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-white p-5">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <div className="text-xs uppercase tracking-wider text-sky-700/90">HMPI Report</div>
+                  <h1 className="text-xl font-bold text-slate-900">Automated Report with AI Summary</h1>
+                </div>
+                <div className="text-xs text-slate-600">
+                  <div>Date: {new Date().toLocaleDateString()}</div>
+                  <div>Rows: {rows.length.toLocaleString()}</div>
+                  <div>Units: {units} • Standards: {profile}</div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid sm:grid-cols-3 gap-3">
               <Summary title="HPI (avg)" value={average(computed.map(r => r.HPI))} hint="Weighted by standards" />
               <Summary title="HEI (avg)" value={average(computed.map(r => r.HEI))} hint="Σ(Mi/Si)" />
               <Summary title="CI (max)" value={Math.max(...computed.map(r => r.CI))} hint="max(Mi/Si)" />
             </div>
+
+            {aiText && (
+              <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 p-5">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">AI Executive Summary</h3>
+                <div
+                  className="prose prose-slate prose-sm max-w-none dark:prose-invert"
+                  dangerouslySetInnerHTML={{ __html: renderSimpleMarkdown(aiText) }}
+                />
+              </div>
+            )}
+            {aiError && <div className="text-sm text-red-500">{aiError}</div>}
 
             <div>
               <h3 className="text-lg font-semibold mb-2">Average concentration by metal ({units})</h3>

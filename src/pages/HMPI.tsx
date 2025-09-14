@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { MetalKey, metalLabels, standardsMgL, computeHPI, categorizeHPI, formatNumber, computeHEI, computeCI } from '../lib/hmpi';
+import { renderSimpleMarkdown } from '../lib/markdown';
 
 type Row = { key: MetalKey; value: string };
 
@@ -83,7 +84,7 @@ export default function HMPIPage() {
                       key={k}
                       metalKey={k}
                       value={rows.find(r => r.key===k)?.value ?? ''}
-                      onChange={(value) => setRows((prev) => prev.map(r => r.key===k ? { ...r, value } : r))}
+                      onChange={(value: string) => setRows((prev) => prev.map(r => r.key===k ? { ...r, value } : r))}
                     />
                   ))}
                 </div>
@@ -283,21 +284,6 @@ function Tooltip({ children, content }: { children: React.ReactNode; content: st
   );
 }
 
-
-
-function renderSimpleMarkdown(md: string) {
-  const lines = md.split(/\r?\n/);
-  const html = lines
-    .map((l) => {
-      if (/^\s*#\s+/.test(l)) return `<h3 class="text-lg font-semibold mt-3">${l.replace(/^\s*#\s+/, '')}</h3>`;
-      if (/^\s*##\s+/.test(l)) return `<h4 class="font-semibold mt-2">${l.replace(/^\s*##\s+/, '')}</h4>`;
-      if (/^\s*-\s+/.test(l)) return `<li>${l.replace(/^\s*-\s+/, '')}</li>`;
-      return `<p class="mt-2">${l}</p>`;
-    })
-    .join('');
-  // wrap list items if any
-  return html.includes('<li>') ? html.replace(/(<li>.*?<\/li>)/gs, '<ul class="list-disc ml-5">$1</ul>') : html;
-}
 
 function AIInsights({ inputs, hpi, hei, ci }: { inputs: Record<MetalKey, number>; hpi: number; hei: number; ci: number }) {
   const [loading, setLoading] = useState(false);
