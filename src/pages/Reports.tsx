@@ -222,9 +222,15 @@ Context JSON:\n${JSON.stringify(meta)}\n`;
         <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <a href="/" className="rounded-md border border-black/10 dark:border-white/10 px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/10">← Home</a>
-            <span className="font-semibold tracking-tight">Report Generation</span>
+            <a href="/api-docs" className="rounded-md border border-black/10 dark:border-white/10 px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/10">API Documentation</a>
+            <a href="/generate-reports" className="rounded-md border border-black/10 dark:border-white/10 px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/10">Report Generation</a>
+            <a href="/scholar-lookup" className="rounded-md border border-black/10 dark:border-white/10 px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/10">Scholar Lookup</a>
           </div>
-          <div className="text-xs text-slate-700 dark:text-slate-300">Export PDF and CSV with charts and summaries</div>
+          <div className="text-xs text-slate-700 dark:text-slate-300">
+            <div>Comprehensive guide to the API endpoints and usage.</div>
+            <div>Export PDF and CSV reports with charts and summaries.</div>
+            <div>Search journal papers via Google Scholar API integration.</div>
+          </div>
         </div>
       </header>
 

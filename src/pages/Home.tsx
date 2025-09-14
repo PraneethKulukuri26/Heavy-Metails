@@ -71,6 +71,9 @@ export default function HomePage() {
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-700 dark:text-slate-200">
             <a className="hover:text-black dark:hover:text-white" href="#map">Map</a>
+            <a className="hover:text-black dark:hover:text-white" href="/api-docs">API Documentation</a>
+            <a className="hover:text-black dark:hover:text-white" href="/generate-reports">Report Generation</a>
+            <a className="hover:text-black dark:hover:text-white" href="/scholar-lookup">Scholar Lookup</a>
             <a className="hover:text-black dark:hover:text-white" href="#features">Features</a>
             <a className="hover:text-black dark:hover:text-white" href="#hmpi">HMPI</a>
             <a className="hover:text-black dark:hover:text-white" href="#resources">Resources</a>
