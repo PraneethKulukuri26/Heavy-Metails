@@ -12,6 +12,7 @@ import ScholarLookup from './pages/ScholarLookup';
 import StateDetail from './pages/StateDetail';
 import StatesIndex from './pages/StatesIndex';
 import UserDashboard from './pages/UserDashboard';
+import ExploreApprovedData from './pages/ExploreApprovedData';
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Root container missing');
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
       { path: '/states', element: <StatesIndex /> },
       { path: '/states/:slug', element: <StateDetail /> },
   { path: '/dashboard', element: <UserDashboard /> },
+  { path: '/explore', element: <ExploreApprovedData /> },
   { path: '*', element: <NotFound /> },
     ],
   },
