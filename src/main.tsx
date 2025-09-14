@@ -15,6 +15,7 @@ import StateDetail from './pages/StateDetail';
 import StatesIndex from './pages/StatesIndex';
 import UserDashboard from './pages/UserDashboard';
 import ExploreApprovedData from './pages/ExploreApprovedData';
+import ApiDocs from './pages/ApiDocs';
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Root container missing');
@@ -45,6 +46,7 @@ const router = createBrowserRouter([
   { path: '/reports', element: <ReportsPage /> },
   { path: '/dashboard', element: <UserDashboard /> },
   { path: '/explore', element: <ExploreApprovedData /> },
+  { path: '/api-docs', element: <ApiDocs /> },
   { path: '*', element: <NotFound /> },
     ],
   },

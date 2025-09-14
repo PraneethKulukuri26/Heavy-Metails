@@ -3,6 +3,7 @@ import HomePage from './pages/Home';
 import { AuthPage } from './pages/Auth';
 import UserDashboard from './pages/UserDashboard';
 import ExploreApprovedData from './pages/ExploreApprovedData';
+import ApiDocs from './pages/ApiDocs';
 
 export default function AppRouter() {
   return (
@@ -13,6 +14,7 @@ export default function AppRouter() {
   <Route path="/auth" element={<AuthPage />} />
   <Route path="/dashboard" element={<UserDashboard />} />
   <Route path="/explore" element={<ExploreApprovedData />} />
+  <Route path="/api-docs" element={<ApiDocs />} />
       </Routes>
     </BrowserRouter>
   );
