@@ -12,7 +12,7 @@ import {
   Line,
 } from 'recharts';
 
-import { computeCI, computeHEI, computeHPI, standardsMgL, scaleStandards, type MetalKey, type Standards } from '../lib/hmpi';
+import { computeCI, computeHEI, computeHPI, standardsMgL, scaleStandards, type MetalKey, type Standards, categorizeOverall } from '../lib/hmpi';
 import { renderSimpleMarkdown } from '../lib/markdown';
 
 type Row = {
@@ -81,7 +81,8 @@ export default function ReportsPage() {
       const { hpi } = computeHPI(inputsMg, stdProfile);
       const { hei } = computeHEI(inputsMg, stdProfile);
       const { ci } = computeCI(inputsMg, stdProfile);
-      return { ...r, HPI: hpi, HEI: hei, CI: ci };
+      const cat = categorizeOverall(hpi, hei, ci).label;
+      return { ...r, HPI: hpi, HEI: hei, CI: ci, Category: cat } as Row & { HPI: number; HEI: number; CI: number; Category: string };
     });
   }, [rows, stdProfile]);
 
@@ -171,7 +172,7 @@ Context JSON:\n${JSON.stringify(meta)}\n`;
   }, [rows.length, aiText, aiLoading, generateAISummary]);
 
   function downloadCSV() {
-    const headers = [...requiredHeaders, 'HPI','HEI','CI'] as const;
+    const headers = [...requiredHeaders, 'HPI','HEI','CI','Category'] as const;
     const csv = [headers.join(',')].concat(
       computed.map(r => (headers as readonly string[]).map(h => String((r as unknown as Record<string, unknown>)[h] ?? '')).join(','))
     ).join('\n');
@@ -370,7 +371,7 @@ Context JSON:\n${JSON.stringify(meta)}\n`;
               <table className="min-w-full text-sm text-slate-900 dark:text-slate-100">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/60">
-                    {([...requiredHeaders, 'HPI','HEI','CI'] as string[]).map(h => (
+                    {([...requiredHeaders, 'HPI','HEI','CI','Category'] as string[]).map(h => (
                       <th key={h} className="p-2 text-left">{h}</th>
                     ))}
                   </tr>
@@ -382,6 +383,17 @@ Context JSON:\n${JSON.stringify(meta)}\n`;
                       <td className="p-2">{r.HPI.toFixed(2)}</td>
                       <td className="p-2">{r.HEI.toFixed(2)}</td>
                       <td className="p-2">{r.CI.toFixed(2)}</td>
+                      <td className="p-2">
+                        <span className={
+                          `inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
+                            r.Category === 'Good' ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800/40' :
+                            r.Category === 'Alert' ? 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800/40' :
+                            r.Category === 'Poor' ? 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/40 dark:text-orange-300 dark:border-orange-800/40' :
+                            r.Category === 'Critical' ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-800/40' :
+                            'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:border-rose-800/40'
+                          }`
+                        }>{r.Category}</span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

@@ -90,3 +90,26 @@ export function scaleStandards(base: Standards, factor: number): Standards {
   (Object.keys(base) as MetalKey[]).forEach(k => { out[k] = base[k] * factor; });
   return out;
 }
+
+// Categorize HEI and CI on a 5-level scale aligned with HPI labels
+export function categorizeHEI(hei: number) {
+  if (hei <= 10) return { label: 'Good', color: '#22c55e' };
+  if (hei <= 20) return { label: 'Alert', color: '#eab308' };
+  if (hei <= 30) return { label: 'Poor', color: '#f97316' };
+  if (hei <= 40) return { label: 'Critical', color: '#ef4444' };
+  return { label: 'Hazardous', color: '#991b1b' };
+}
+
+export function categorizeCI(ci: number) {
+  if (ci <= 1) return { label: 'Good', color: '#22c55e' };
+  if (ci <= 2) return { label: 'Alert', color: '#eab308' };
+  if (ci <= 3) return { label: 'Poor', color: '#f97316' };
+  if (ci <= 5) return { label: 'Critical', color: '#ef4444' };
+  return { label: 'Hazardous', color: '#991b1b' };
+}
+
+export function categorizeOverall(hpi: number, hei: number, ci: number) {
+  const levels: Record<string, number> = { Good: 0, Alert: 1, Poor: 2, Critical: 3, Hazardous: 4 };
+  const choices = [categorizeHPI(hpi), categorizeHEI(hei), categorizeCI(ci)];
+  return choices.reduce((worst, cur) => (levels[cur.label] > levels[worst.label] ? cur : worst), choices[0]);
+}
