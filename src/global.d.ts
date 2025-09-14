@@ -8,3 +8,12 @@ interface ImportMetaEnv {
 interface ImportMeta {
 	readonly env: ImportMetaEnv;
 }
+
+declare module '*.csv?url' {
+	const src: string;
+	export default src;
+}
+declare module '*.csv' {
+	const content: string;
+	export default content;
+}
