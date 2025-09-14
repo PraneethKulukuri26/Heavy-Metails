@@ -71,15 +71,14 @@ export default function HomePage() {
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-700 dark:text-slate-200">
             <a className="hover:text-black dark:hover:text-white" href="#map">Map</a>
-            <a className="hover:text-black dark:hover:text-white" href="/api-docs">API Documentation</a>
-            <a className="hover:text-black dark:hover:text-white" href="/generate-reports">Report Generation</a>
+            <a className="hover:text-black dark:hover:text-white" href="/reports">Report Generation</a>
             <a className="hover:text-black dark:hover:text-white" href="/scholar-lookup">Scholar Lookup</a>
+            <a className="hover:text-black dark:hover:text-white" href="/api-docs">API Documentation</a>
             <a className="hover:text-black dark:hover:text-white" href="#features">Features</a>
             <a className="hover:text-black dark:hover:text-white" href="#hmpi">HMPI</a>
             <a className="hover:text-black dark:hover:text-white" href="#resources">Resources</a>
           </nav>
           <div className="flex items-center gap-3">
-            <a href="#soon" className="text-sm text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white">Docs</a>
             <button
               type="button"
               aria-label="Toggle theme"
@@ -269,9 +268,9 @@ export default function HomePage() {
       <section id="resources" className="relative border-t border-black/10 dark:border-white/10">
         <div className="mx-auto max-w-7xl px-4 py-16">
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="reveal-up"><ResourceCard title="API Documentation" desc="Comprehensive guide to the API endpoints and usage." cta="View Docs" href="/api-docs" /></div>
-            <div className="reveal-up reveal-delay-1"><ResourceCard title="Report Generation" desc="Export PDF and CSV reports with charts and summaries." cta="Generate Reports" href="/reports" /></div>
-            <div className="reveal-up reveal-delay-2"><ResourceCard title="Scholar Lookup" desc="Search journal papers via Google Scholar API integration." cta="Search Papers" href="/scholar-lookup" /></div>
+            <div className="reveal-up"><ResourceCard title="Report Generation" desc="Export PDF and CSV reports with charts and summaries." cta="Generate Reports →" href="/reports" /></div>
+            <div className="reveal-up reveal-delay-1"><ResourceCard title="Scholar Lookup" desc="Search journal papers via Google Scholar API integration." cta="Search Papers →" href="/scholar-lookup" /></div>
+            <div className="reveal-up reveal-delay-2"><ResourceCard title="API Documentation" desc="Comprehensive guide to the API endpoints and usage." cta="View Docs →" href="/api-docs" /></div>
           </div>
         </div>
       </section>

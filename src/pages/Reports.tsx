@@ -222,9 +222,9 @@ Context JSON:\n${JSON.stringify(meta)}\n`;
         <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <a href="/" className="rounded-md border border-black/10 dark:border-white/10 px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/10">← Home</a>
-            <a href="/api-docs" className="rounded-md border border-black/10 dark:border-white/10 px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/10">API Documentation</a>
-            <a href="/generate-reports" className="rounded-md border border-black/10 dark:border-white/10 px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/10">Report Generation</a>
+            <a href="/reports" className="rounded-md border border-black/10 dark:border-white/10 px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/10">Report Generation</a>
             <a href="/scholar-lookup" className="rounded-md border border-black/10 dark:border-white/10 px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/10">Scholar Lookup</a>
+            <a href="/api-docs" className="rounded-md border border-black/10 dark:border-white/10 px-2 py-1 text-xs hover:bg-black/5 dark:hover:bg-white/10">API Documentation</a>
           </div>
           <div className="text-xs text-slate-700 dark:text-slate-300">
             <div>Comprehensive guide to the API endpoints and usage.</div>
@@ -235,6 +235,27 @@ Context JSON:\n${JSON.stringify(meta)}\n`;
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-8 space-y-8">
+        {/* Quick Actions */}
+        <section className="grid md:grid-cols-3 gap-4">
+          <a href="/reports" className="group rounded-2xl border border-black/10 dark:border-white/10 bg-gradient-to-br from-sky-100/70 to-white/60 dark:from-slate-900/70 dark:to-slate-900/40 p-5 hover:border-sky-500/40 transition">
+            <div className="text-[10px] uppercase tracking-wider text-sky-700/90 dark:text-sky-300/90 font-semibold">Report Generation</div>
+            <h3 className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">Export PDF and CSV</h3>
+            <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">Export PDF and CSV reports with charts and summaries.</p>
+            <div className="mt-4 inline-flex items-center gap-1 text-sky-700 hover:text-sky-600 dark:text-sky-400 dark:hover:text-sky-300 text-sm">Generate Reports →</div>
+          </a>
+          <a href="/scholar-lookup" className="group rounded-2xl border border-black/10 dark:border-white/10 bg-gradient-to-br from-emerald-100/60 to-white/60 dark:from-slate-900/70 dark:to-slate-900/40 p-5 hover:border-emerald-500/40 transition">
+            <div className="text-[10px] uppercase tracking-wider text-emerald-700/90 dark:text-emerald-300/90 font-semibold">Scholar Lookup</div>
+            <h3 className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">Search Papers</h3>
+            <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">Search journal papers via Google Scholar API integration.</p>
+            <div className="mt-4 inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 text-sm">Search Papers →</div>
+          </a>
+          <a href="/api-docs" className="group rounded-2xl border border-black/10 dark:border-white/10 bg-gradient-to-br from-slate-100/70 to-white/60 dark:from-slate-900/70 dark:to-slate-900/40 p-5 hover:border-slate-400/50 transition">
+            <div className="text-[10px] uppercase tracking-wider text-slate-700/90 dark:text-slate-300/90 font-semibold">API Documentation</div>
+            <h3 className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">Developer Guide</h3>
+            <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">Comprehensive guide to the API endpoints and usage.</p>
+            <div className="mt-4 inline-flex items-center gap-1 text-slate-800 hover:text-slate-700 dark:text-slate-200 dark:hover:text-white text-sm">View Docs →</div>
+          </a>
+        </section>
         <section className="grid md:grid-cols-3 gap-6">
           <div className="md:col-span-2 rounded-2xl border border-black/10 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 p-4">
             <h2 className="font-semibold">Upload CSV</h2>
